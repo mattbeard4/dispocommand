@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Fluff — Dispo Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ── Tokyo Night Backgrounds ── */
+  --bg:           #1a1b26;
+  --bg-card:      #24283b;
+  --bg-subtle:    #2f3549;
+  --bg-elevated:  #343b53;
+  --bg-hover:     #3d4563;
+
+  /* ── Borders ── */
+  --border:       #3b4261;
+  --border-md:    #4e5579;
+  --border-lt:    #5a6390;
+
+  /* ── Text ── */
+  --ink:          #c0caf5;
+  --ink-2:        #a9b1d6;
+  --ink-3:        #6d7ab8;
+  --ink-4:        #4e5579;
+
+  /* ── Spectrum: baby blue → cyan → teal → mint green ── */
+  --sky:          #7dcfff;
+  --cyan:         #2ac3de;
+  --teal:         #73daca;
+  --mint:         #9ece6a;
+  --grad-spectrum: linear-gradient(135deg, #7dcfff 0%, #2ac3de 30%, #73daca 65%, #9ece6a 100%);
+  --grad-btn:      linear-gradient(135deg, #2ac3de 0%, #73daca 100%);
+  --grad-soft:     linear-gradient(135deg, rgba(125,207,255,0.08) 0%, rgba(115,218,202,0.08) 100%);
+
+  /* ── Primary (teal) ── */
+  --primary:      #73daca;
+  --primary-dk:   #59c4b4;
+  --primary-lt:   rgba(115,218,202,0.12);
+  --primary-md:   rgba(115,218,202,0.25);
+  --primary-glow: rgba(115,218,202,0.2);
+
+  /* ── Status ── */
+  --green:        #9ece6a;
+  --green-lt:     rgba(158,206,106,0.12);
+  --green-md:     rgba(158,206,106,0.3);
+  --red:          #f7768e;
+  --red-lt:       rgba(247,118,142,0.12);
+  --purple:       #bb9af7;
+  --purple-lt:    rgba(187,154,247,0.12);
+  --yellow:       #e0af68;
+  --yellow-lt:    rgba(224,175,104,0.12);
+  --yellow-md:    rgba(224,175,104,0.3);
+  --orange:       #ff9e64;
+
+  /* ── Shadows (Tokyo Night tinted) ── */
+  --shadow-xs:    0 1px 3px rgba(0,0,0,0.3);
+  --shadow-sm:    0 2px 10px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md:    0 4px 20px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2);
+  --shadow-lg:    0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+
+  /* ── Radius ── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   18px;
+  --r-xl:   22px;
+  --r-pill: 999px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.55;
+}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-md); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-lt); }
+
+/* ─── NAV ─── */
+.nav {
+  position:sticky; top:0; z-index:100;
+  background: rgba(26,27,38,0.94);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px;
+  display:flex; align-items:center; justify-content:space-between;
+  height:62px;
+  box-shadow: 0 1px 0 var(--border);
+}
+.nav-left { display:flex; align-items:center; gap:12px; }
+.nav-logo {
+  width:34px; height:34px;
+  background: var(--grad-btn);
+  border-radius: var(--r-sm);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 16px var(--primary-glow);
+  flex-shrink:0;
+}
+.nav-logo svg { width:18px; height:18px; }
+.nav-title {
+  font-family:'Nunito',sans-serif;
+  font-size:16px; font-weight:800;
+  color: var(--ink); letter-spacing:-0.01em;
+}
+.nav-dot { width:4px; height:4px; border-radius:50%; background:var(--border-md); }
+.nav-sub { font-size:13px; color:var(--ink-3); font-weight:500; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+
+.deal-pill {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-pill);
+  cursor:pointer;
+  font-size:13px; font-weight:600; color:var(--ink-2);
+  box-shadow: var(--shadow-xs);
+  transition: all 0.18s ease;
+}
+.deal-pill:hover { border-color:var(--primary); color:var(--primary); transform:translateY(-1px); box-shadow: 0 0 12px var(--primary-glow); }
+.deal-pulse {
+  width:8px; height:8px; border-radius:50%;
+  background: var(--primary);
+  box-shadow: 0 0 6px var(--primary);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.45;transform:scale(0.8);} }
+
+.nav-badge {
+  padding:7px 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size:12px; font-weight:600; color:var(--ink-3);
+}
+
+/* ─── MODAL ─── */
+.overlay {
+  position:fixed; inset:0; z-index:1000;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+  opacity:0; pointer-events:none;
+  transition: opacity 0.25s;
+}
+.overlay.open { opacity:1; pointer-events:all; }
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  padding:40px;
+  width:100%; max-width:560px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(18px) scale(0.98);
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative; overflow:hidden;
+}
+.modal::before {
+  content:'';
+  position:absolute; top:-60px; right:-60px;
+  width:220px; height:220px;
+  background: radial-gradient(circle, var(--primary-lt) 0%, transparent 70%);
+  pointer-events:none;
+}
+.overlay.open .modal { transform:translateY(0) scale(1); }
+.modal-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background: var(--primary-lt);
+  border: 1px solid var(--primary-md);
+  border-radius: var(--r-pill);
+  padding:4px 12px;
+  font-size:11px; font-weight:700; color:var(--primary);
+  letter-spacing:0.04em; text-transform:uppercase;
+  margin-bottom:12px;
+}
+.modal-title {
+  font-family:'Nunito',sans-serif;
+  font-size:26px; font-weight:800;
+  color:var(--ink); margin-bottom:4px; letter-spacing:-0.02em;
+}
+.modal-sub { font-size:13px; color:var(--ink-3); margin-bottom:26px; }
+.field-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-full { grid-column:1/-1; }
+.field label {
+  display:block; font-size:11px; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:5px;
+}
+.field input {
+  width:100%;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding:10px 14px;
+  color:var(--ink);
+  font-family:'DM Sans',sans-serif;
+  font-size:14px; outline:none;
+  transition: all 0.15s;
+}
+.field input:focus {
+  border-color: var(--primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px var(--primary-lt);
+}
+.field input::placeholder { color:var(--ink-4); }
+.btn-save {
+  width:100%; margin-top:22px; padding:14px;
+  background: var(--grad-btn);
+  border:none; border-radius:var(--r-pill);
+  color: var(--bg);
+  font-family:'Nunito',sans-serif;
+  font-size:15px; font-weight:800;
+  cursor:pointer;
+  box-shadow: 0 4px 18px var(--primary-glow);
+  transition: all 0.18s ease;
+  letter-spacing:-0.01em;
+}
+.btn-save:hover { opacity:0.9; transform:translateY(-2px); box-shadow: 0 6px 24px var(--primary-glow); }
+.btn-save:active { transform:scale(0.98); }
+.modal-x {
+  position:absolute; top:18px; right:18px;
+  width:32px; height:32px;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color:var(--ink-3); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; transition: all 0.15s;
+}
+.modal-x:hover { background:var(--red-lt); border-color:var(--red); color:var(--red); }
+
+/* ─── HERO ─── */
+.hero {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding:48px 36px 36px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:28px; flex-wrap:wrap;
+  position:relative; overflow:hidden;
+}
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 600px 300px at 20% 50%, rgba(42,195,222,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 80% 20%, rgba(115,218,202,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 250px at 60% 80%, rgba(158,206,106,0.04) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:11px; font-weight:700; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--teal);
+  margin-bottom:10px; position:relative;
+}
+.hero-eyebrow::before {
+  content:''; width:16px; height:2.5px;
+  background: var(--grad-spectrum); border-radius:2px; display:inline-block;
+}
+.hero-title {
+  font-family:'Nunito',sans-serif;
+  font-size:clamp(32px,4.5vw,52px);
+  font-weight:900; color:var(--ink);
+  letter-spacing:-0.03em; line-height:1.05;
+  margin-bottom:16px; position:relative;
+}
+.hero-title span {
+  background: var(--grad-spectrum);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-addr-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:9px 18px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-pill);
+  font-size:13px; font-weight:600; color:var(--ink-2);
+  cursor:pointer; transition: all 0.18s; position:relative;
+}
+.hero-addr-btn:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-lt); transform:translateY(-1px); }
+
+.hero-stats { display:flex; gap:12px; flex-wrap:wrap; position:relative; }
+.h-stat {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding:18px 24px; text-align:center; min-width:106px;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.18s;
+}
+.h-stat:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--border-md); }
+.h-stat-num {
+  font-family:'Nunito',sans-serif;
+  font-size:30px; font-weight:900; line-height:1;
+  letter-spacing:-0.03em;
+  background: var(--grad-spectrum);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.h-stat-lbl { font-size:11px; font-weight:600; color:var(--ink-3); margin-top:4px; text-transform:uppercase; letter-spacing:0.04em; }
+
+/* ─── PROGRESS ─── */
+.prog-wrap {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding:14px 36px;
+  display:flex; align-items:center; gap:18px;
+}
+.prog-lbl { font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.prog-track {
+  flex:1; height:8px;
+  background: var(--bg-subtle);
+  border-radius: var(--r-pill); overflow:hidden;
+  border: 1px solid var(--border);
+}
+.prog-fill {
+  height:100%; border-radius:var(--r-pill);
+  background: var(--grad-spectrum);
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 8px rgba(115,218,202,0.4);
+}
+.prog-ct { font-size:12px; font-weight:700; color:var(--ink-2); white-space:nowrap; }
+
+/* ─── LAYOUT ─── */
+.layout { display:flex; min-height:calc(100vh - 62px); }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width:224px; flex-shrink:0;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding:22px 14px;
+  position:sticky; top:62px;
+  height:calc(100vh - 62px);
+  overflow-y:auto;
+}
+.sb-header { font-size:10px; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--ink-4); padding:0 8px 12px; }
+.sb-item {
+  width:100%; padding:10px 12px;
+  border-radius:var(--r-md); border:none; background:transparent;
+  cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:11px;
+  margin-bottom:3px; transition: all 0.15s;
+}
+.sb-item:hover { background: var(--bg-subtle); }
+.sb-item.active { background: var(--primary-lt); }
+.sb-badge {
+  width:30px; height:30px; flex-shrink:0;
+  border-radius: var(--r-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-md);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Nunito',sans-serif;
+  font-size:12px; font-weight:800; color:var(--ink-3);
+  transition: all 0.15s;
+}
+.sb-item.active .sb-badge {
+  background: var(--grad-btn);
+  border-color:transparent; color:var(--bg);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+.sb-item.done-all .sb-badge {
+  background: var(--green-lt); border-color:var(--green-md); color:var(--green);
+}
+.sb-info { flex:1; min-width:0; }
+.sb-name { font-size:13px; font-weight:700; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sb-item.active .sb-name { color:var(--primary); }
+.sb-pct { font-size:11px; color:var(--ink-4); margin-top:2px; font-weight:600; }
+.sb-bar { height:3px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:5px; }
+.sb-bar-fill { height:100%; background:var(--grad-spectrum); border-radius:2px; transition:width 0.4s; }
+.sb-item.done-all .sb-bar-fill { background:var(--green); }
+
+/* ─── MAIN ─── */
+.main { flex:1; padding:32px 36px 110px; min-width:0; }
+
+/* ─── PANEL ─── */
+.panel { display:none; animation:fadeUp 0.22s ease; }
+.panel.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+.day-hdr {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:28px;
+  padding-bottom:22px; border-bottom: 1px solid var(--border);
+}
+.day-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background: var(--primary-lt);
+  border: 1px solid var(--primary-md);
+  border-radius: var(--r-pill);
+  padding:4px 12px;
+  font-size:11px; font-weight:800; color:var(--primary);
+  text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;
+}
+.day-title {
+  font-family:'Nunito',sans-serif;
+  font-size:28px; font-weight:900; color:var(--ink);
+  letter-spacing:-0.02em; line-height:1.15; margin-bottom:7px;
+}
+.day-obj { font-size:14px; color:var(--ink-3); max-width:500px; line-height:1.6; }
+.day-ct {
+  background:var(--bg-subtle); border: 1px solid var(--border);
+  border-radius:var(--r-pill); padding:8px 16px;
+  font-size:12px; font-weight:700; color:var(--ink-2); white-space:nowrap; flex-shrink:0;
+}
+
+.sec-h {
+  display:flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:800;
+  letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-4);
+  margin-bottom:12px;
+}
+.sec-h::after { content:''; flex:1; height:1px; background:var(--border); border-radius:1px; }
+
+/* ─── CHECKLIST ─── */
+.checklist { display:flex; flex-direction:column; gap:7px; margin-bottom:30px; }
+.ci {
+  display:flex; align-items:flex-start; gap:13px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding:13px 16px;
+  cursor:pointer; transition: all 0.18s ease;
+  user-select:none; box-shadow:var(--shadow-xs);
+}
+.ci:hover { border-color:var(--border-md); background:var(--bg-subtle); transform:translateX(3px); }
+.ci.done { background:var(--green-lt); border-color:var(--green-md); }
+.ci.done:hover { transform:none; }
+.ci-box {
+  width:22px; height:22px; flex-shrink:0;
+  border: 1.5px solid var(--border-md);
+  border-radius:var(--r-xs);
+  display:flex; align-items:center; justify-content:center;
+  background: var(--bg-subtle); transition: all 0.18s; margin-top:1px;
+}
+.ci.done .ci-box { background:var(--green); border-color:var(--green); box-shadow:0 0 8px rgba(158,206,106,0.35); }
+.ci-check { font-size:12px; color:var(--bg); opacity:0; transition:opacity 0.15s; }
+.ci.done .ci-check { opacity:1; }
+.ci-text { font-size:14px; line-height:1.5; color:var(--ink-2); flex:1; transition:color 0.15s; }
+.ci.done .ci-text { color:var(--ink-4); text-decoration:line-through; text-decoration-color:var(--ink-4); }
+.ci-tag {
+  font-size:10px; font-weight:800; letter-spacing:0.04em;
+  padding:3px 9px; border-radius:var(--r-pill); flex-shrink:0; margin-top:2px;
+}
+.tag-mgr   { background:var(--purple-lt); color:var(--purple); border:1px solid rgba(187,154,247,0.25); }
+.tag-asst  { background:var(--primary-lt); color:var(--teal); border:1px solid var(--primary-md); }
+.tag-crit  { background:rgba(255,158,100,0.1); color:var(--orange); border:1px solid rgba(255,158,100,0.25); }
+
+/* ─── TEMPLATES ─── */
+.tpl-stack { display:flex; flex-direction:column; gap:9px; margin-bottom:30px; }
+.tpl-card {
+  background:var(--bg-card); border: 1px solid var(--border);
+  border-radius:var(--r-lg); overflow:hidden;
+  box-shadow:var(--shadow-xs); transition: all 0.15s;
+}
+.tpl-card:hover { border-color:var(--border-md); }
+.tpl-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; cursor:pointer; transition:background 0.15s;
+}
+.tpl-hdr:hover { background:var(--bg-subtle); }
+.tpl-hdr-l { display:flex; align-items:center; gap:11px; }
+.tpl-icon {
+  width:34px; height:34px;
+  background: var(--grad-soft);
+  border: 1px solid var(--border-md);
+  border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.tpl-card.magic .tpl-icon { background:var(--yellow-lt); border-color:var(--yellow-md); }
+.tpl-name { font-size:13px; font-weight:700; color:var(--ink); }
+.tpl-ch {
+  font-size:10px; font-weight:700; padding:3px 9px;
+  border-radius:var(--r-pill);
+  background:var(--bg-subtle); border:1px solid var(--border-md);
+  color:var(--ink-3);
+}
+.tpl-chev { font-size:14px; color:var(--ink-4); transition:transform 0.2s; }
+.tpl-card.open .tpl-chev { transform:rotate(180deg); }
+.tpl-body { display:none; padding:16px 18px; border-top:1px solid var(--border); background:var(--bg-subtle); }
+.tpl-card.open .tpl-body { display:block; }
+.tpl-text { font-size:14px; line-height:1.75; color:var(--ink-2); white-space:pre-wrap; }
+.tpl-foot { display:none; padding:10px 18px; border-top:1px solid var(--border); gap:8px; }
+.tpl-card.open .tpl-foot { display:flex; }
+.btn-copy {
+  display:flex; align-items:center; gap:7px;
+  padding:7px 16px;
+  background:var(--bg-card); border:1px solid var(--border-md);
+  border-radius:var(--r-pill);
+  color:var(--ink-2); font-size:12px; font-weight:700;
+  cursor:pointer; font-family:'DM Sans',sans-serif;
+  transition: all 0.15s;
+}
+.btn-copy:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-lt); transform:translateY(-1px); }
+.btn-copy.copied { border-color:var(--green); color:var(--green); background:var(--green-lt); }
+
+/* ─── MAGIC CARDS ─── */
+.mq-wrap { display:flex; flex-direction:column; gap:10px; margin-bottom:30px; }
+.mq-card {
+  background: linear-gradient(135deg, rgba(224,175,104,0.08), rgba(224,175,104,0.04));
+  border: 1px solid var(--yellow-md);
+  border-radius:var(--r-lg); padding:20px 22px;
+  box-shadow:var(--shadow-xs);
+}
+.mq-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  background: var(--yellow-lt);
+  border: 1px solid var(--yellow-md);
+  border-radius:var(--r-pill); padding:4px 12px;
+  font-size:10px; font-weight:800; color:var(--yellow);
+  text-transform:uppercase; letter-spacing:0.06em; margin-bottom:11px;
+}
+.mq-q {
+  font-family:'Nunito',sans-serif;
+  font-size:18px; font-weight:800; color:var(--ink);
+  line-height:1.4; letter-spacing:-0.01em; margin-bottom:6px;
+}
+.mq-q em {
+  font-style:italic;
+  background:var(--grad-spectrum);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.mq-type { font-size:12px; color:var(--ink-3); font-weight:500; }
+
+/* ─── BUYER TIERS ─── */
+.tiers-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:30px; }
+.tier {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding:20px;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s;
+  position:relative; overflow:hidden;
+}
+.tier::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:3px;
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+}
+.tier-A::before { background: linear-gradient(90deg, #ff9e64, #f7768e); }
+.tier-B::before { background: linear-gradient(90deg, #e0af68, #7dcfff); }
+.tier-C::before { background: linear-gradient(90deg, #73daca, #9ece6a); }
+.tier:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--border-md); }
+
+/* SVG icon container */
+.tier-icon-wrap {
+  width:44px; height:44px;
+  border-radius: var(--r-md);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:14px;
+}
+.tier-A .tier-icon-wrap { background:rgba(247,118,142,0.1); border:1px solid rgba(247,118,142,0.2); }
+.tier-B .tier-icon-wrap { background:rgba(224,175,104,0.1); border:1px solid rgba(224,175,104,0.2); }
+.tier-C .tier-icon-wrap { background:var(--primary-lt); border:1px solid var(--primary-md); }
+
+.tier-label {
+  display:inline-block; font-size:10px; font-weight:800;
+  text-transform:uppercase; letter-spacing:0.06em;
+  padding:3px 10px; border-radius:var(--r-pill); margin-bottom:8px;
+}
+.tier-A .tier-label { background:rgba(247,118,142,0.12); color:var(--red); border:1px solid rgba(247,118,142,0.25); }
+.tier-B .tier-label { background:var(--yellow-lt); color:var(--yellow); border:1px solid var(--yellow-md); }
+.tier-C .tier-label { background:var(--primary-lt); color:var(--primary); border:1px solid var(--primary-md); }
+
+.tier-name { font-family:'Nunito',sans-serif; font-size:16px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+.tier-desc { font-size:12px; color:var(--ink-3); line-height:1.55; }
+.tier-action {
+  font-size:11px; font-weight:700; margin-top:12px;
+  padding-top:12px; border-top:1px solid var(--border); color:var(--ink-2);
+}
+
+/* ─── LEAD FLOW ─── */
+.lead-flow { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin-bottom:30px; }
+.lf-node {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--r-pill); padding:5px 12px;
+  font-size:12px; font-weight:600; color:var(--ink-2);
+  box-shadow:var(--shadow-xs); transition:all 0.15s;
+}
+.lf-node:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-lt); }
+.lf-arr { color:var(--ink-4); font-size:13px; }
+
+/* ─── KPIs ─── */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:9px; }
+.kpi-card {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:16px;
+  box-shadow:var(--shadow-xs); transition:all 0.18s;
+}
+.kpi-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-sm); border-color:var(--border-md); }
+.kpi-ico { font-size:20px; margin-bottom:9px; }
+.kpi-name { font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; }
+.kpi-inp {
+  width:100%;
+  background:var(--bg-subtle); border:1px solid var(--border-md);
+  border-radius:var(--r-sm); padding:7px 11px;
+  font-family:'Nunito',sans-serif;
+  font-size:18px; font-weight:800; color:var(--ink);
+  outline:none; letter-spacing:-0.02em; transition:all 0.15s;
+}
+.kpi-inp:focus { border-color:var(--primary); background:var(--bg-elevated); box-shadow:0 0 0 3px var(--primary-lt); }
+.kpi-inp::placeholder { color:var(--ink-4); font-size:16px; }
+
+/* ─── BOTTOM ─── */
+.bottom {
+  position:fixed; bottom:0; left:0; right:0;
+  background: rgba(26,27,38,0.96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding:12px 36px;
+  display:flex; align-items:center; justify-content:space-between;
+  z-index:50;
+}
+.bottom-brand { font-size:12px; color:var(--ink-3); display:flex; align-items:center; gap:8px; }
+.bottom-brand strong { color:var(--ink-2); font-weight:700; }
+.btn-reset {
+  padding:7px 16px;
+  background:var(--bg-card); border:1px solid var(--border-md);
+  border-radius:var(--r-pill);
+  color:var(--ink-3); font-size:12px; font-weight:700;
+  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;
+}
+.btn-reset:hover { border-color:var(--red); color:var(--red); background:var(--red-lt); }
+
+@media(max-width:700px){
+  .nav,.prog-wrap,.hero,.bottom{padding-left:18px;padding-right:18px;}
+  .sidebar{display:none;}
+  .main{padding:22px 18px 110px;}
+  .tiers-grid{grid-template-columns:1fr;}
+  .hero{flex-direction:column;}
+  .field-grid{grid-template-columns:1fr;}
+  .hero-stats{width:100%;justify-content:space-between;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-logo">
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+        <path d="M3 5h14M3 10h10M3 15h7" stroke="#1a1b26" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="nav-title">No Fluff</div>
+    <div class="nav-dot"></div>
+    <div class="nav-sub">Dispo Tracker</div>
+  </div>
+  <div class="nav-right">
+    <div class="deal-pill" onclick="openModal()">
+      <div class="deal-pulse"></div>
+      <span id="nav-addr">Set Deal Info</span>
+    </div>
+    <div class="nav-badge" id="nav-pct">0 / 0 tasks</div>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div class="modal-tag">⚡ Deal Setup</div>
+    <div class="modal-title">Configure Your Deal</div>
+    <div class="modal-sub">Templates auto-fill with these details — set it once, done.</div>
+    <div class="field-grid">
+      <div class="field field-full"><label>Property Address</label><input id="f-address" placeholder="123 Main St, Phoenix AZ"/></div>
+      <div class="field"><label>Beds / Baths</label><input id="f-beds" placeholder="3BD / 2BA"/></div>
+      <div class="field"><label>Square Footage</label><input id="f-sqft" placeholder="1,850 sq ft"/></div>
+      <div class="field"><label>Lot / Acres</label><input id="f-lot" placeholder="0.25 acres"/></div>
+      <div class="field"><label>Year Built</label><input id="f-year" placeholder="1978"/></div>
+      <div class="field"><label>Walkthrough Date</label><input id="f-walkthrough" placeholder="Thursday, March 13"/></div>
+      <div class="field"><label>Walkthrough Time</label><input id="f-time" placeholder="10:00 AM"/></div>
+      <div class="field"><label>Offer Deadline</label><input id="f-deadline" placeholder="Friday 12:00 PM"/></div>
+      <div class="field"><label>Closing Date</label><input id="f-closing" placeholder="March 28"/></div>
+      <div class="field"><label>EMD Amount</label><input id="f-emd" placeholder="$5,000"/></div>
+      <div class="field field-full"><label>City / Area</label><input id="f-city" placeholder="Phoenix / Maricopa County"/></div>
+      <div class="field field-full"><label>Dispo Manager Name</label><input id="f-mgr" placeholder="Your name"/></div>
+    </div>
+    <button class="btn-save" onclick="saveDeal()">🔒 Lock It In →</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">5-Day Disposition System</div>
+    <div class="hero-title">Dispo<br><span>Command</span></div>
+    <div class="hero-addr-btn" onclick="openModal()" id="hero-addr">📍 Click to set your deal info</div>
+  </div>
+  <div class="hero-stats">
+    <div class="h-stat"><div class="h-stat-num" id="hs-done">0</div><div class="h-stat-lbl">Done</div></div>
+    <div class="h-stat"><div class="h-stat-num" id="hs-pct">0%</div><div class="h-stat-lbl">Complete</div></div>
+    <div class="h-stat"><div class="h-stat-num">5</div><div class="h-stat-lbl">Days</div></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="prog-wrap">
+  <div class="prog-lbl">Progress</div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-ct" id="prog-ct">0 of 0 tasks</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-header">Days</div>
+    <div id="sb-nav"></div>
+  </div>
+  <div class="main" id="main"></div>
+</div>
+
+<!-- BOTTOM -->
+<div class="bottom">
+  <div class="bottom-brand"><strong>No Fluff Real Estate</strong><span>·</span><span>school.com/nofluffrealestate</span></div>
+  <button class="btn-reset" onclick="confirmReset()">↺ Reset Checklist</button>
+</div>
+
+<script>
+// ── SVG ICONS for tier cards (no emojis) ──
+const TIER_ICONS = {
+  hot: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C12 2 8 7 8 11C8 11 6 9.5 6.5 7C4.5 9 3 11.5 3 14C3 18.4183 7.02944 22 12 22C16.9706 22 21 18.4183 21 14C21 9 16 5 12 2Z" fill="#f7768e" opacity="0.9"/>
+    <path d="M12 10C12 10 10 13 10 15C10 16.1046 10.8954 17 12 17C13.1046 17 14 16.1046 14 15C14 13 12 10 12 10Z" fill="#ff9e64"/>
+  </svg>`,
+  warm: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="5" fill="#e0af68" opacity="0.9"/>
+    <line x1="12" y1="2" x2="12" y2="4.5" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="19.5" x2="12" y2="22" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="2" y1="12" x2="4.5" y2="12" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="19.5" y1="12" x2="22" y2="12" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="4.93" y1="4.93" x2="6.76" y2="6.76" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="17.24" y1="17.24" x2="19.07" y2="19.07" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="19.07" y1="4.93" x2="17.24" y2="6.76" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6.76" y1="17.24" x2="4.93" y2="19.07" stroke="#e0af68" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+  cold: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="12" y1="2" x2="12" y2="22" stroke="#73daca" stroke-width="2" stroke-linecap="round"/>
+    <line x1="2" y1="12" x2="22" y2="12" stroke="#73daca" stroke-width="2" stroke-linecap="round"/>
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="#73daca" stroke-width="2" stroke-linecap="round"/>
+    <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" stroke="#73daca" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="2.5" fill="#73daca"/>
+    <circle cx="12" cy="3.5" r="1.5" fill="#73daca" opacity="0.6"/>
+    <circle cx="12" cy="20.5" r="1.5" fill="#73daca" opacity="0.6"/>
+    <circle cx="3.5" cy="12" r="1.5" fill="#73daca" opacity="0.6"/>
+    <circle cx="20.5" cy="12" r="1.5" fill="#73daca" opacity="0.6"/>
+  </svg>`
+};
+
+const SK='nf-dispo-v6';
+let deal={address:'',beds:'',sqft:'',lot:'',year:'',walkthrough:'',time:'',deadline:'',closing:'',emd:'',city:'',mgr:''};
+let checks={};
+const f=k=>({address:deal.address||'[Address]',beds:deal.beds||'[Beds/Baths]',sqft:deal.sqft||'[Sq Ft]',lot:deal.lot||'[Lot/Acres]',year:deal.year||'[Year Built]',walkthrough:deal.walkthrough||'[Walkthrough Date]',time:deal.time||'[Time]',deadline:deal.deadline||'[Offer Deadline]',closing:deal.closing||'[Closing Date]',emd:deal.emd||'[EMD Amount]',city:deal.city||'[City/Area]',mgr:deal.mgr||'[Dispo Manager]'}[k]);
+
+const DAYS=[
+  {id:0,label:'Day 0',name:'Pre-Blast Prep',obj:'Get everything set before anything goes public. No blast until media is uploaded and title is open.',
+   checks:[{id:'d0-1',text:'Open title with preferred title company',tag:'crit'},{id:'d0-2',text:'Align property name/ID across CRM, deal portal, and shared drive',tag:'asst'},{id:'d0-3',text:'Upload all photos, videos, and specs to deal portal',tag:'asst'},{id:'d0-4',text:'Verify walkthrough date/time is set in portal & calendar',tag:'asst'},{id:'d0-5',text:'Confirm CRM deal portal is fully populated — no blast until this is done',tag:'crit'}],
+   templates:[],extras:'tiers'},
+  {id:1,label:'Day 1',name:'Blast & Build',obj:'Generate conversations and identify serious buyers. Keep copy vague to prompt replies.',
+   checks:[{id:'d1-1',text:'Send email + SMS blast to full buyer list',tag:'asst'},{id:'d1-2',text:'Post to Facebook groups and dispo services',tag:'asst'},{id:'d1-3',text:'Log all interested replies as buyer leads in Prospects (tag A/B/C)',tag:'asst'},{id:'d1-4',text:'Dispo Manager calls A-Tier buyers personally — same day, no exceptions',tag:'mgr'}],
+   templates:[{id:'t1',title:'Day 1 — Promo Blast',ch:'Email / SMS',em:'📣',getText:()=>`Quick heads up on a new opportunity in ${f('city')}. ${f('beds')}, ${f('sqft')}, ${f('lot')}, Built ${f('year')}. Walkthrough ${f('walkthrough')}. Reply INFO for details or tap here: [Deal Portal Link]. – ${f('mgr')}`}]},
+  {id:2,label:'Day 2',name:'Outreach',obj:'Grow the buyer pool and surface demand. Keep details light on text — move to the phone.',
+   checks:[{id:'d2-1',text:'Call skip-traced active buyers in the area (not yet on list)',tag:'mgr'},{id:'d2-2',text:'Send basic-info text and portal link to interested parties',tag:'asst'},{id:'d2-3',text:'Update all Prospects statuses in CRM',tag:'asst'},{id:'d2-4',text:'Move all interested buyers from text to a phone call',tag:'mgr'}],
+   templates:[{id:'t2',title:'Day 2 — Follow-Up Text',ch:'SMS',em:'💬',getText:()=>`Great talking a minute ago. Here's the link with photos/specs: [Portal Link]. Walkthrough is ${f('walkthrough')} at ${f('time')}. I'll follow up after you review.`}]},
+  {id:3,label:'Day 3',name:'Reminders',obj:'Maximize walkthrough turnout. Get firm RSVPs and keep A-Tier buyers warm.',
+   checks:[{id:'d3-1',text:'Individually text interested buyers to confirm walkthrough attendance',tag:'asst'},{id:'d3-2',text:'Update statuses: "Attending Walkthrough" or "Not Interested"',tag:'asst'},{id:'d3-3',text:'Touch base with A-Tier buyers — quick personal call',tag:'mgr'}],
+   templates:[{id:'t3',title:'Day 3 — Walkthrough Reminder',ch:'SMS',em:'📍',getText:()=>`Walkthrough for ${f('address')} is tomorrow at ${f('time')}. Can I mark you as attending? Details: [Portal Link].`}]},
+  {id:4,label:'Day 4',name:'Walkthrough Day',obj:'Run the walkthrough. Record every attendee. Open the offer window immediately after.',
+   checks:[{id:'d4-1',text:'Send morning reminders to all "Attending" buyers with address, time, and parking',tag:'asst'},{id:'d4-2',text:'Record attendance on-site — update status to "Attended Event"',tag:'mgr'},{id:'d4-3',text:'Send post-walkthrough offer reminder with deadline, closing date, and EMD instructions',tag:'asst'}],
+   templates:[
+     {id:'t4a',title:'Day 4 Morning — Walkthrough Reminder',ch:'SMS',em:'☀️',getText:()=>`Reminder for ${f('address')} today at ${f('time')}. Bring a flashlight and tape. Details: [Portal Link].`},
+     {id:'t4b',title:'Day 4 Post-Walk — Offer Reminder',ch:'SMS',em:'📋',getText:()=>`Thanks for coming out to ${f('address')}. Offers due ${f('deadline')}. Closing ${f('closing')}, EMD ${f('emd')}. Submit here: [Portal Link].`}
+   ]},
+  {id:5,label:'Day 5',name:'Decision Day',obj:'Lock the deal by noon. Magic Questions drive best offers. Award the contract and collect EMD.',
+   checks:[{id:'d5-1',text:'Send Magic Question #1 text to every buyer who submitted an offer',tag:'asst'},{id:'d5-2',text:'Dispo Manager calls top 3 interested buyers with Magic Question #2',tag:'mgr'},{id:'d5-3',text:'Final 30-min heads-up call to buyers #2 and #3 — last chance to improve',tag:'mgr'},{id:'d5-4',text:'Select top offer at 12:00 PM sharp',tag:'crit'},{id:'d5-5',text:'Coordinate assignment/double-close docs and collect EMD receipt',tag:'mgr'},{id:'d5-6',text:'Send FOMO/Thank You text to all interested — invite back-up offers via portal',tag:'asst'},{id:'d5-7',text:'Update final statuses in CRM: Purchased, back-up, not selected',tag:'asst'}],
+   templates:[
+     {id:'tm1',title:'Magic Question #1',ch:'SMS',em:'⚡',magic:true,getText:()=>`Appreciate your offer of $[X] on ${f('address')}. Is that the best you can do?`},
+     {id:'tm2',title:'Magic Question #2',ch:'Live Call',em:'📞',magic:true,getText:()=>`We have multiple offers on this but would really love to get you into the deal — is [their amount] really the best you can do?`},
+     {id:'th',title:'Courtesy Heads-Up to Buyers #2 & #3',ch:'Call',em:'🔔',getText:()=>`You're close but you're not #1 right now. If you want to improve before the deadline, now's the time.`},
+     {id:'tf',title:'Post-Selection FOMO / Thank You',ch:'SMS',em:'🤝',getText:()=>`Thanks for the interest in ${f('address')}. We've selected a buyer. Submit a backup offer here: [Portal Link]. We'll keep you posted.`}
+   ],extras:'kpis'},
+];
+
+function loadS(){try{const r=JSON.parse(localStorage.getItem(SK)||'{}');deal=r.deal||deal;checks=r.checks||{};}catch(e){}}
+function saveS(){try{localStorage.setItem(SK,JSON.stringify({deal,checks}));}catch(e){}}
+function openModal(){Object.keys(deal).forEach(k=>{const el=document.getElementById('f-'+k);if(el)el.value=deal[k]||'';});document.getElementById('overlay').classList.add('open');}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function saveDeal(){Object.keys(deal).forEach(k=>{const el=document.getElementById('f-'+k);if(el)deal[k]=el.value.trim();});saveS();updateAddr();refreshTpls();closeModal();}
+function updateAddr(){const a=deal.address;document.getElementById('hero-addr').textContent=a?'📍 '+a:'📍 Click to set your deal info';document.getElementById('nav-addr').textContent=a||'Set Deal Info';}
+
+function buildUI(){
+  const sb=document.getElementById('sb-nav'),mn=document.getElementById('main');
+  sb.innerHTML='';mn.innerHTML='';
+  DAYS.forEach((d,i)=>{
+    const btn=document.createElement('div');
+    btn.className='sb-item'+(i===0?' active':'');btn.id='sbi-'+d.id;btn.onclick=()=>switchTab(d.id);
+    btn.innerHTML=`<div class="sb-badge" id="sbb-${d.id}">${d.id}</div><div class="sb-info"><div class="sb-name">${d.name}</div><div class="sb-pct" id="sbp-${d.id}">0%</div><div class="sb-bar"><div class="sb-bar-fill" id="sbf-${d.id}" style="width:0%"></div></div></div>`;
+    sb.appendChild(btn);
+    const panel=document.createElement('div');
+    panel.className='panel'+(i===0?' active':'');panel.id='panel-'+d.id;
+    panel.innerHTML=buildPanel(d);
+    mn.appendChild(panel);
+  });
+}
+
+function buildPanel(d){
+  const tot=d.checks.length,dn=d.checks.filter(c=>checks[c.id]).length;
+  let h=`<div class="day-hdr"><div><div class="day-tag">${d.label}</div><div class="day-title">${d.name}</div><div class="day-obj">${d.obj}</div></div><div class="day-ct" id="dc-${d.id}">${dn} / ${tot} done</div></div>`;
+
+  h+=`<div class="sec-h">Checklist</div><div class="checklist">`;
+  d.checks.forEach(c=>{
+    const done=checks[c.id]?' done':'';
+    const tag=c.tag==='mgr'?'<div class="ci-tag tag-mgr">MGR</div>':c.tag==='asst'?'<div class="ci-tag tag-asst">ASST</div>':'<div class="ci-tag tag-crit">CRITICAL</div>';
+    h+=`<div class="ci${done}" id="ci-${c.id}" onclick="toggle('${c.id}',${d.id})"><div class="ci-box"><span class="ci-check">✓</span></div><div class="ci-text">${c.text}</div>${tag}</div>`;
+  });
+  h+=`</div>`;
+
+  if(d.id===5){
+    h+=`<div class="sec-h">Magic Questions</div><div class="mq-wrap">
+      <div class="mq-card"><div class="mq-badge">⚡ Magic Question #1 — Text</div><div class="mq-q">"Appreciate your offer of <em>$[X]</em> on [address]. Is that the best you can do?"</div><div class="mq-type">Send via text to every buyer who submitted an offer</div></div>
+      <div class="mq-card"><div class="mq-badge">⚡ Magic Question #2 — Live Call</div><div class="mq-q">"We have multiple offers but would love to get you in this deal — is that <em>really</em> the best you can do?"</div><div class="mq-type">Called to top 3 buyers by Dispo Manager</div></div>
+    </div>`;
+  }
+
+  if(d.templates.length){
+    h+=`<div class="sec-h">Communication Templates</div><div class="tpl-stack">`;
+    d.templates.forEach(t=>{h+=buildTpl(t);});
+    h+=`</div>`;
+  }
+
+  if(d.extras==='tiers'){
+    h+=`<div class="sec-h">Buyer Tiers</div><div class="tiers-grid">
+      <div class="tier tier-A">
+        <div class="tier-icon-wrap">${TIER_ICONS.hot}</div>
+        <div class="tier-label">A-Tier</div>
+        <div class="tier-name">Hot Lead</div>
+        <div class="tier-desc">Verified closers, repeat buyers. Proof of funds or hard money ready to go.</div>
+        <div class="tier-action">→ Call personally on Day 1</div>
+      </div>
+      <div class="tier tier-B">
+        <div class="tier-icon-wrap">${TIER_ICONS.warm}</div>
+        <div class="tier-label">B-Tier</div>
+        <div class="tier-name">Warm Lead</div>
+        <div class="tier-desc">Has closed previously or completed the pre-qualification process.</div>
+        <div class="tier-action">→ Include in blast</div>
+      </div>
+      <div class="tier tier-C">
+        <div class="tier-icon-wrap">${TIER_ICONS.cold}</div>
+        <div class="tier-label">C-Tier</div>
+        <div class="tier-name">Cold Lead</div>
+        <div class="tier-desc">New or unverified buyer. Needs qualification before prioritizing.</div>
+        <div class="tier-action">→ Blast + qualify</div>
+      </div>
+    </div>
+    <div class="sec-h">Lead Flow Status</div>
+    <div class="lead-flow">
+      ${['Sent','Viewed','Interested','Not Interested','Attending Event','Attended Event','Offered','Purchased']
+        .map((s,i,a)=>`<div class="lf-node">${s}</div>${i<a.length-1?'<span class="lf-arr">→</span>':''}`)
+        .join('')}
+    </div>`;
+  }
+
+  if(d.extras==='kpis'){
+    h+=`<div class="sec-h" style="margin-top:10px;">Weekly KPIs</div><div class="kpi-grid">
+      ${[['📬','Blast Open Rate','—%'],['💬','Inbound Inquiries','0'],['🚶','RSVP vs Attended','0/0'],['📝','Offer Count','0'],['💰','Offer vs List %','—%'],['⏱️','EMD Posted (hrs)','0h'],['👥','New Buyers Added','0']]
+        .map(([ico,nm,ph])=>`<div class="kpi-card"><div class="kpi-ico">${ico}</div><div class="kpi-name">${nm}</div><input class="kpi-inp" placeholder="${ph}"/></div>`)
+        .join('')}
+    </div>`;
+  }
+  return h;
+}
+
+function buildTpl(t){
+  return `<div class="tpl-card${t.magic?' magic':''}" id="tc-${t.id}">
+    <div class="tpl-hdr" onclick="togTpl('${t.id}')">
+      <div class="tpl-hdr-l"><div class="tpl-icon">${t.em}</div><div class="tpl-name">${t.title}</div><div class="tpl-ch">${t.ch}</div></div>
+      <div class="tpl-chev">▾</div>
+    </div>
+    <div class="tpl-body"><div class="tpl-text" id="tt-${t.id}">${esc(t.getText())}</div></div>
+    <div class="tpl-foot"><button class="btn-copy" id="bc-${t.id}" onclick="cpTpl('${t.id}')">📋 Copy to clipboard</button></div>
+  </div>`;
+}
+
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function refreshTpls(){DAYS.forEach(d=>d.templates.forEach(t=>{const el=document.getElementById('tt-'+t.id);if(el)el.textContent=t.getText();}));}
+function togTpl(id){document.getElementById('tc-'+id).classList.toggle('open');}
+function cpTpl(id){
+  const el=document.getElementById('tt-'+id),btn=document.getElementById('bc-'+id);if(!el)return;
+  const ok=()=>{btn.classList.add('copied');btn.textContent='✓ Copied!';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='📋 Copy to clipboard';},2000);};
+  navigator.clipboard?.writeText(el.textContent).then(ok).catch(()=>{const t=document.createElement('textarea');t.value=el.textContent;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);ok();});
+}
+function toggle(cid,dayId){
+  checks[cid]=!checks[cid];
+  const el=document.getElementById('ci-'+cid);
+  if(checks[cid])el.classList.add('done');else el.classList.remove('done');
+  saveS();updateProg();
+}
+function updateProg(){
+  let tot=0,dn=0;
+  DAYS.forEach(d=>{
+    const dt=d.checks.length,dd=d.checks.filter(c=>checks[c.id]).length;
+    tot+=dt;dn+=dd;
+    const pct=dt?Math.round(dd/dt*100):0;
+    const sbf=document.getElementById('sbf-'+d.id),sbp=document.getElementById('sbp-'+d.id),sbi=document.getElementById('sbi-'+d.id),dc=document.getElementById('dc-'+d.id);
+    if(sbf)sbf.style.width=pct+'%';if(sbp)sbp.textContent=pct+'%';if(dc)dc.textContent=`${dd} / ${dt} done`;
+    if(sbi){if(pct===100)sbi.classList.add('done-all');else sbi.classList.remove('done-all');}
+  });
+  const pct=tot?Math.round(dn/tot*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-ct').textContent=`${dn} of ${tot} tasks`;
+  document.getElementById('nav-pct').textContent=`${dn} / ${tot} tasks`;
+  document.getElementById('hs-done').textContent=dn;
+  document.getElementById('hs-pct').textContent=pct+'%';
+}
+function switchTab(id){
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('sbi-'+id).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+function confirmReset(){
+  if(confirm('Reset all checklist progress? Your deal info will be kept.'))
+  {checks={};saveS();buildUI();updateProg();updateAddr();refreshTpls();}
+}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+loadS();buildUI();updateProg();updateAddr();
+</script>
+</body>
+</html>
